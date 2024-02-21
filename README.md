@@ -12,10 +12,10 @@ Simplifier is a [Blazor Server](https://learn.microsoft.com/en-us/aspnet/core/bl
 You can run this application in several ways:
 
 ### Visual Studio / Rider
-Open Simplifier.sln solution, and run the Simplifier:http configuration.
+Open Simplifier.sln solution, and run the `Simplifier:http` configuration.
 
 ### dotnet CLI
-In the root of the project, run dotnet run --project Simplifier
+In the root of the project, run `dotnet run --project Simplifier`
 
 ### docker compose
 Create a copy of the .env.template file found in the project root and add a valid OpenAI API key to it.
