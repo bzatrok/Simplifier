@@ -54,3 +54,6 @@ node_modules/
 
 # .env file
 .env
+
+# generated css file
+Simplifier/wwwroot/css/output.css
