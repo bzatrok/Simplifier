@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplifier", "Simplifier\Simplifier.csproj", "{49D6430A-AD22-4A5D-85EB-895180071561}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplifier.Core", "Simplifier.Core\Simplifier.Core.csproj", "{7F921EFB-7860-4823-AF63-C827FA373ED3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{49D6430A-AD22-4A5D-85EB-895180071561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49D6430A-AD22-4A5D-85EB-895180071561}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49D6430A-AD22-4A5D-85EB-895180071561}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49D6430A-AD22-4A5D-85EB-895180071561}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F921EFB-7860-4823-AF63-C827FA373ED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F921EFB-7860-4823-AF63-C827FA373ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F921EFB-7860-4823-AF63-C827FA373ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F921EFB-7860-4823-AF63-C827FA373ED3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

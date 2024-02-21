@@ -1,0 +1,138 @@
+﻿@page "/simplify/{*simplifyUrl}"
+@using System.Text.Json
+@using Simplifier.Core.Models
+@using Newtonsoft.Json
+@inject ILogger<SimplifiedArticle> Logger
+@using JsonSerializer = System.Text.Json.JsonSerializer
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IHttpClientFactory HttpClientFactory
+@attribute [StreamRendering(true)]
+@inject NavigationManager NavigationManager
+
+<PageTitle>Simplified article</PageTitle>
+<article class="prose md:prose-lg mx-auto dark:prose-dark p-4 h-full bg-gray-50">
+
+    @if (IsLoading || SimplifiedArticleResponse == null)
+    {
+        <div class="min-h-screen flex flex-col justify-center items-center">
+            <p class="text-2xl font-medium text-center text-gray-800">Simplifying...</p>
+            <p class="text-center mb-4 text-gray-600">@CurrentMessage</p>
+        </div>
+    }
+    else
+    {
+        <h1 class="text-xl md:text-3xl">@SimplifiedArticleResponse.Title</h1>
+
+        <p>
+            Source:
+            <a href="@SimplifyUrl" 
+               target="_blank"
+               rel="noopener noreferrer" >
+                @SimplifyUrl
+            </a>
+        </p>
+        
+        @if (SimplifiedArticleResponse != null)
+        {
+            <div class="whitespace-pre-wrap">
+                @SimplifiedArticleResponse.Content
+            </div>
+        }
+        
+        <div class="mt-10">
+            <a href="/">
+                <button
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Simplify another URL
+                </button>
+            </a>
+        </div>
+    }
+</article>
+
+@code {
+    
+    [Parameter]
+    public string? SimplifyUrl { get; set; }
+    
+    [Parameter]
+    public string? TargetSpeakerLevel { get; set; }
+    
+    [Parameter]
+    public string? TargetLanguageCode { get; set; }
+    
+    private bool IsLoading = true;
+    private SimplifiedArticleResponse? SimplifiedArticleResponse = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Logger.LogInformation("Initializing SimplifiedArticle component for URL: {0}", SimplifyUrl);
+
+        timer = new System.Threading.Timer(CycleMessage, null, 0, 2000);
+
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        // Extract the path and query string
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("TargetLanguageCode", out var targetLanguageCodes))
+            TargetLanguageCode = targetLanguageCodes.FirstOrDefault();
+
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("TargetSpeakerLevel", out var targetSpeakerLevels))
+            TargetSpeakerLevel = targetSpeakerLevels.FirstOrDefault();
+        
+        var baseUrl = Environment.GetEnvironmentVariable("HOST_URL");
+
+        var client = HttpClientFactory.CreateClient();
+        client.BaseAddress = new Uri(baseUrl);
+        
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/simplify");
+        request.Headers.Add("Accept", "application/json");
+
+        var requestContent = new
+        {
+            SimplifyUrl = SimplifyUrl.Trim(),
+            TargetLanguageCode = TargetLanguageCode,
+            TargetSpeakerLevel = TargetSpeakerLevel
+        };
+        
+        request.Content = new StringContent(JsonConvert.SerializeObject(requestContent), System.Text.Encoding.UTF8, "application/json");
+
+        Logger.LogInformation("Sending request to simplify URL: {0}", SimplifyUrl);
+        
+        var response = await client.SendAsync(request);
+        
+        Logger.LogInformation("Received response from simplify URL: {0}", SimplifyUrl);
+
+        if (response.IsSuccessStatusCode && 
+            response.Content != null)
+        {
+            var responseString = await response.Content.ReadAsStringAsync();
+            SimplifiedArticleResponse = JsonSerializer.Deserialize<SimplifiedArticleResponse>(responseString, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+        }
+        
+        IsLoading = false;
+    }
+    
+    private List<string> messages = new List<string>
+    {
+        "Hang in there...",
+        "Almost done...",
+        "Just a bit longer..."
+    };
+    private int currentIndex = 0;
+    private System.Threading.Timer? timer;
+    private string CurrentMessage => messages[currentIndex];
+
+    private void CycleMessage(object? state)
+    {
+        currentIndex = (currentIndex + 1) % messages.Count;
+        InvokeAsync(StateHasChanged);
+    }
+    
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

@@ -1,0 +1,127 @@
+﻿@page "/"
+@using Simplifier.Models
+@inject ILogger<SubmitUrlForm> Logger
+@using Simplifier.Core.Enums
+@using System.Text
+@using Simplifier.Core.Extensions
+@attribute [StreamRendering(true)]
+@using System.Globalization
+
+@inject NavigationManager NavigationManager
+
+<PageTitle>Simplifier</PageTitle>
+
+    <article class="bg-gray-50 md:bg-gradient-to-r from-sky-500 to-indigo-500 ">
+        <div class="px-4 mx-auto max-w-full md:max-w-xl lg:max-w-2xl min-h-screen flex flex-col justify-center items-center">
+            <div class="py-6 px-10 md:py-10 md:px-20 md:rounded-md bg-gray-50 md:border md:border-gray-200">
+                <h1 class="text-4xl font-bold text-center mb-4">Simplifier</h1>
+                <h3 class="text-center text-lg mb-6">Enter a URL below to simplify the language used on the site!</h3>
+
+                <div class="w-full max-w-md">
+                    <form method="post"
+                          @formname="SubmitUrlForm"
+                          @onclick:preventDefault="true"
+                          @onclick:stopPropagation="true"
+                          @onsubmit="SubmitUrl"
+                          class="flex flex-col gap-4">
+                        <AntiforgeryToken />
+                        <InputText 
+                            type="url" 
+                            class="border border-gray-200 rounded-md p-2 text-gray-700"
+                            placeholder="Enter a full URL" 
+                            required
+                            @bind-Value="Model.EnteredUrl" />
+                        
+                        <div class="flex flex-row mb-5 gap-2">
+                            <div class="flex flex-grow flex-col gap-2">
+                                <label class="font-medium md:text-lg">
+                                    Speaker Level
+                                </label>
+                                <InputSelect
+                                    class="border-gray-200 border p-2 bg-white rounded-md text-gray-800"
+                                    @bind-Value="Model.TargetSpeakerLevel">
+                                    @foreach (var speakerLevel in (LanguageSpeakerLevel[])Enum.GetValues(typeof(LanguageSpeakerLevel)))
+                                    {
+                                        <option>@speakerLevel</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="flex flex-grow flex-col gap-2">
+                                <label class="font-medium md:text-lg">
+                                    Target Language
+                                </label>
+                                <InputSelect
+                                    class="border-gray-200 border p-2 bg-white rounded-md text-gray-800"
+                                    @bind-Value="Model.TargetLanguageCode">
+                                    @foreach (var languageCode in languageCodes)
+                                    {
+                                        var cultureDisplayName = CultureInfo.GetCultures(CultureTypes.AllCultures)
+                                            .FirstOrDefault(lang => lang.Name.Equals(languageCode.Trim(), StringComparison.OrdinalIgnoreCase))?.DisplayName ?? "Unknown Culture";
+                                        <option
+                                            value="@languageCode">
+                                            @cultureDisplayName
+                                        </option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                        
+                        <button type="submit"
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Simplify the content!
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </article>
+
+@code {
+    [SupplyParameterFromForm]
+    public SubmitUrlForm? Model { get; set; }
+    
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+    
+    private void OnLanguageSpeakerLevelValueChange(string val){
+        System.Diagnostics.Debugger.Break();
+        Model.TargetSpeakerLevel=EnumExtensions.GetEnumValueFromDescription<LanguageSpeakerLevel>(val);
+        System.Diagnostics.Debugger.Break();
+        ValueChanged.InvokeAsync(val);
+    }
+
+    private readonly string[] languageCodes = new string[]
+    {
+        "en",
+        "hu",
+        "nl"
+    };
+    
+    protected override void OnInitialized() => Model ??= new();
+
+    private void SubmitUrl()
+    {
+        string baseUrl = "/simplify/";
+        StringBuilder queryStringBuilder = new StringBuilder();
+
+        if (!string.IsNullOrWhiteSpace(Model.TargetLanguageCode))
+            queryStringBuilder.Append($"TargetLanguageCode={Model.TargetLanguageCode}");
+
+        if (Model.TargetSpeakerLevel != null)
+        {
+            if (queryStringBuilder.Length > 0)
+                queryStringBuilder.Append("&");
+            queryStringBuilder.Append($"TargetSpeakerLevel={Model.TargetSpeakerLevel}");
+        }
+
+        string queryString = queryStringBuilder.Length > 0 ? $"?{queryStringBuilder}" : string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(Model.EnteredUrl))
+        {   
+            string sanitizedUrl = Model.EnteredUrl.Trim();
+            string encodedUrl = System.Net.WebUtility.UrlEncode(sanitizedUrl);
+            string finalUrl = $"{baseUrl}{encodedUrl}{queryString}";
+            NavigationManager.NavigateTo(finalUrl, forceLoad: false);
+        }
+    }
+}

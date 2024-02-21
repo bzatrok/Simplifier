@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  dotnet:
+    image: bzatrok/simplifier:latest
+    build:
+      context: .
+      dockerfile: ./Simplifier/Dockerfile
+      args:
+        BUILD_CONFIGURATION: Release
+    depends_on:
+      - redis
+    ports:
+      - "5214:5214"
+    environment:
+      - ASPNETCORE_URLS=http://+:5214
+      - REDIS_HOST=redis:6379
+      - REDIS_DATABASE=0
+  redis:
+    image: redis
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning
+    environment:
+      - REDIS_AOF_ENABLED=yes
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis_data:/data
+volumes:
+  redis_data:
+    driver: local
