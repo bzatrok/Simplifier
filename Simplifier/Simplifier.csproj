@@ -25,13 +25,4 @@
         <Exec Command="npm install"/>
     </Target>
 
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css.map" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="wwwroot\css\" />
-    </ItemGroup>
-
 </Project>

@@ -21,6 +21,7 @@ COPY ["Simplifier/Simplifier.csproj", "Simplifier/"]
 RUN dotnet restore "Simplifier/Simplifier.csproj"
 COPY . .
 WORKDIR "/src/Simplifier"
+COPY --from=node_build /web/wwwroot/css ./wwwroot/css/
 RUN dotnet build "Simplifier.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
@@ -30,6 +31,4 @@ RUN dotnet publish "Simplifier.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN rm -rf wwwroot/css/*
-COPY --from=node_build /web/wwwroot/css ./wwwroot/css/
 ENTRYPOINT ["dotnet", "Simplifier.dll"]
