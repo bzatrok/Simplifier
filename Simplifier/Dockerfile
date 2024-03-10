@@ -30,5 +30,6 @@ RUN dotnet publish "Simplifier.csproj" -c $BUILD_CONFIGURATION -o /app/publish /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY --from=node_build /web/wwwroot .
+RUN rm -rf wwwroot/css/*
+COPY --from=node_build /web/wwwroot/css ./wwwroot/css/
 ENTRYPOINT ["dotnet", "Simplifier.dll"]

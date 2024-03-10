@@ -118,8 +118,6 @@ public class Program
 			.AddFilter("Microsoft.Hosting", LogLevel.Information)
 			.SetMinimumLevel(logLevel);
 
-		builder.WebHost.UseStaticWebAssets();
-
 		var app = builder.Build();
 
 		if (!app.Environment.IsDevelopment())
