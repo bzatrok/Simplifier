@@ -20,7 +20,7 @@ In the root of the project, run `dotnet run --project Simplifier`
 ### docker compose
 Create a copy of the .env.template file found in the project root and add a valid OpenAI API key to it.
 
-Run `docker compose --env-file .env up -d`. 
+Run `docker compose up --build -d`. 
 
 In each of the hosting scenarios, the application will be running under `http://localhost:5124`. 
 

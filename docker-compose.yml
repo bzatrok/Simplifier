@@ -12,6 +12,8 @@ services:
       - redis
     ports:
       - "5214:5214"
+    env_file:
+      - ./.env
     environment:
       - ASPNETCORE_URLS=http://+:5214
       - REDIS_HOST=redis:6379
