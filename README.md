@@ -23,6 +23,3 @@ Create a copy of the .env.template file found in the project root and add a vali
 Run `docker compose up --build -d`. 
 
 In each of the hosting scenarios, the application will be running under `http://localhost:5124`. 
-
-## Demo
-The application is currently reachable via https://simplifythissite.com/
